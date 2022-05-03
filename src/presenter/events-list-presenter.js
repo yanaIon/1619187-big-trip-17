@@ -9,15 +9,35 @@ export default class ListPointPresenter {
   listComponent = new ListPointView();
 
 
-  init = (listContainer) => {
+  init = (listContainer, pointsModel) => {
     this.listContainer = listContainer;
+    this.pointsModel = pointsModel;
+    this.listPoints = [...this.pointsModel.getPoints()];
+    this.listOffers = [...this.pointsModel.getOffers()];
+    this.listDestinations = [...this.pointsModel.getDestinatinations()];
 
     render(this.listComponent, this.listContainer); // ul, куда будут отрисованы li
     render(new NewPointView(), this.listComponent.getElement(), 'beforebegin'); //создание новой точки
-    render(new EditPointView(), this.listComponent.getElement()); //редактирование точки
 
-    for (let i = 0; i < 3; i++) {
-      render(new PointView(), this.listComponent.getElement()); //перечисление точек маршрута
+    for (let i = 0; i < this.listPoints.length; i++) {
+      const offers = this.listPoints[i].offers.map((offerId) => {
+        let result;
+
+        this.listOffers.forEach((offersGroup) => {
+          offersGroup.offers.forEach((offer) => {
+            if(offer.id === offerId) {
+              result = offer;
+            }
+          });
+        });
+
+        return result;
+      }
+      );
+      const destination = this.listDestinations.find((destinationItem) => destinationItem.name === this.listPoints[i].destination);
+
+      render(new PointView(this.listPoints[i], offers), this.listComponent.getElement()); //перечисление точек маршрута
+      render(new EditPointView(this.listPoints[i], offers, destination), this.listComponent.getElement()); //редактирование точки
     }
   };
 }
