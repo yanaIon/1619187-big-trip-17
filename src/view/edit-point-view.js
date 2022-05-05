@@ -1,7 +1,7 @@
 import {createElement} from '../render.js';
 import {TYPE} from '../const.js';
 import {CITY} from '../const.js';
-import {humanizeDate2} from '../util.js';
+import {humanizeDateWithTime} from '../util.js';
 
 
 const createTypeDropdown = (currentType) => `
@@ -18,7 +18,7 @@ const createTypeDropdown = (currentType) => `
 
     ${TYPE.map((type) => `
     <div class="event__type-item">
-    <input ${type === currentType ? 'checked' : ''} id="event-type-bus-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}">
+    <input ${type === currentType ? 'checked' : ''} id="event-type-${type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}">
     <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-1">${type}</label>
   </div>
   `).join('')}
@@ -45,34 +45,40 @@ const createDestination = (currentDestination) =>
   <div class="event__photos-container">
   <div class="event__photos-tape">
   ${currentDestination.pictures.map((picture) =>
-    `<img class="event__photo" src="${picture.src}" alt="Event photo">`
+    `<img class="event__photo" src="${picture.src}" alt="${picture.description}">`
   ).join('')}
   </div>
 </div>`;
-
 const createEditPointTemplate = (point, offers, destination) => {
   const {basePrice, dateFrom, dateTo, type} = point;
 
-  const dateStart = humanizeDate2(dateFrom);
-  const dateEnd = humanizeDate2(dateTo);
+  const dateStart = humanizeDateWithTime(dateFrom);
+  const dateEnd = humanizeDateWithTime(dateTo);
 
-  const getOffersList = function (offersList) {
-    const result = offersList.map(({title, price}) => `<div class="event__offer-selector">
-    <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-1" type="checkbox" name="event-offer-luggage" checked>
-    <label class="event__offer-label" for="event-offer-luggage-1">
-      <span class="event__offer-title">${title}</span>
+
+  const getOffersList = function (offersList, currentPoint) {
+
+    const currentOffers = offersList.find((offersGroup) => offersGroup.type === currentPoint.type);
+
+    return currentOffers.offers.map((offer) => {
+
+      const checked = currentPoint.offers.includes(offer.id) ? 'checked' : '';
+      const offerTitleArray = offer.title.split(' ');
+      const nameOfferForId = offerTitleArray[offerTitleArray.length-1];
+
+      return `<div class="event__offer-selector">
+    <input class="event__offer-checkbox  visually-hidden" id="event-offer-${nameOfferForId}-1" type="checkbox" name="event-offer-luggage" ${checked}></input>
+    <label class="event__offer-label" for="event-offer-${nameOfferForId}-1">
+      <span class="event__offer-title">${offer.title}</span>
       &plus;&euro;&nbsp;
-      <span class="event__offer-price">${price}</span>
+      <span class="event__offer-price">${offer.price}</span>
     </label>
-  </div>`).join('');
-    return result;
-  };
+  </div>`;}).join('');};
 
   return (
     `<li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
       <header class="event__header">
-
         ${createTypeDropdown(type)}
         ${createFieldGroup(type, destination, CITY)}
         <div class="event__field-group  event__field-group--time">
@@ -102,7 +108,7 @@ const createEditPointTemplate = (point, offers, destination) => {
           <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
           <div class="event__available-offers">
-          ${getOffersList(offers)}
+          ${getOffersList(offers, point)}
           </div>
         </section>
 

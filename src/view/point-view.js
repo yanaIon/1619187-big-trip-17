@@ -1,40 +1,47 @@
 import {createElement} from '../render.js';
-import {humanizeDate} from '../util.js';
-import {humanizeDate3} from '../util.js';
+import {humanizeTime} from '../util.js';
+import {humanizeDateMonthAndDay} from '../util.js';
+import {humanizeDateWIithoutTime} from '../util.js';
+import {humanizeDateWithTime} from '../util.js';
+import dayjs from 'dayjs';
+
+const getOffersList = function (offersList) {
+  const result = offersList.map(({title, price}) => `<li class="event__offer">
+    <span class="event__offer-title">${title}</span>
+    &plus;&euro;&nbsp;
+    <span class="event__offer-price">${price}</span>
+  </li>`).join('');
+  return result;
+};
 
 const createPointTemplate = (point, offers) => {
-  const {basePrice, dateFrom, dateTo, isFavorite, type} = point;
+  const {basePrice, dateFrom, dateTo, isFavorite, type, destination} = point;
 
-  const dateStart = humanizeDate(dateFrom);
-  const dateEnd = humanizeDate(dateTo);
-  const datePoint = humanizeDate3(dateFrom);
+  const dateStart = humanizeTime(dateFrom);
+  const dateEnd = humanizeTime(dateTo);
+  const datePoint = humanizeDateMonthAndDay(dateFrom);
+
+  const  duration = dayjs.duration(dayjs(dateTo).diff(dayjs(dateFrom)));
 
   const isFavourite = isFavorite ? 'event__favorite-btn--active' : '';
-
-  const getOffersList = function (offersList) {
-    const result = offersList.map(({title, price}) => `<li class="event__offer">
-      <span class="event__offer-title">${title}</span>
-      &plus;&euro;&nbsp;
-      <span class="event__offer-price">${price}</span>
-    </li>`).join('');
-    return result;
-  };
 
   return (
     `<li class="trip-events__item">
     <div class="event">
-    <time class="event__date" datetime="2019-03-18">${datePoint}</time>
+    <time class="event__date" datetime="${humanizeDateWIithoutTime(dateFrom)}">${datePoint}</time>
     <div class="event__type">
       <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
     </div>
-    <h3 class="event__title">${type} Chamonix</h3>
+    <h3 class="event__title">${type} ${destination}</h3>
     <div class="event__schedule">
       <p class="event__time">
-        <time class="event__start-time" datetime="2019-03-18T12:25">${dateStart}</time>
+        <time class="event__start-time" datetime="${humanizeDateWithTime(dateFrom)}">${dateStart}</time>
         &mdash;
-        <time class="event__end-time" datetime="2019-03-18T13:35">${dateEnd}</time>
+        <time class="event__end-time" datetime="${humanizeDateWithTime(dateTo)}">${dateEnd}</time>
       </p>
-      <p class="event__duration">01H 10M</p>
+      <p class="event__duration">${duration.days() !== 0 ? `${duration.days()}D` : ''}
+                                ${duration.hours() !== 0 ? `${duration.hours()}H` : ''}
+                                ${duration.minutes() !== 0 ? `${duration.minutes()}M` : ''} </p>
     </div>
     <p class="event__price">
       &euro;&nbsp;<span class="event__price-value">${basePrice}</span>

@@ -37,7 +37,7 @@ export default class ListPointPresenter {
       const destination = this.listDestinations.find((destinationItem) => destinationItem.name === this.listPoints[i].destination);
 
       render(new PointView(this.listPoints[i], offers), this.listComponent.getElement()); //перечисление точек маршрута
-      render(new EditPointView(this.listPoints[i], offers, destination), this.listComponent.getElement()); //редактирование точки
+      render(new EditPointView(this.listPoints[i], this.listOffers, destination), this.listComponent.getElement()); //редактирование точки
     }
   };
 }

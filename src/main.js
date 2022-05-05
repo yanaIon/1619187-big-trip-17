@@ -4,6 +4,10 @@ import InfoView from './view/trip-info-view.js';
 import {render} from './render.js';
 import ListPointPresenter from './presenter/events-list-presenter.js';
 import PointsModel from './model/points-model.js';
+import duration from 'dayjs/plugin/duration';
+import dayjs from 'dayjs';
+
+dayjs.extend(duration);
 
 const tripMain = document.querySelector('.trip-main');
 const tripFilters = tripMain.querySelector('.trip-controls__filters');
