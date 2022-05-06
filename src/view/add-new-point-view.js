@@ -1,6 +1,14 @@
 import {createElement} from '../render.js';
+//import flatpickr from 'flatpickr';
 
-const createNewPointTemplate = () => (
+// const a = flatpickr('#event-start-time-1', {
+//   minDate: new Date(),
+//   enableTime: true,
+//   dateFormat: 'Y-m-d H:i',
+// });
+// console.log(a);
+
+const createNewPointTemplate = () =>
   `<li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
     <header class="event__header">
@@ -162,8 +170,8 @@ const createNewPointTemplate = () => (
       </section>
     </section>
   </form>
-</li>`
-);
+</li>`;
+
 
 export default class NewPointView {
   getTemplate() {
