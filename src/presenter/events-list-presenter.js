@@ -3,7 +3,9 @@ import NewPointView from '../view/add-new-point-view.js';
 import PointView from '../view/point-view.js';
 import ListPointView from '../view/list-point-view.js';
 import EditPointView from '../view/edit-point-view.js';
-
+import NoPointView from '../view/no-point-view.js';
+import InfoView from '../view/trip-info-view.js';
+import SortView from '../view/sort-view.js';
 
 export default class ListPointPresenter {
   #listContainer = null;
@@ -23,27 +25,37 @@ export default class ListPointPresenter {
     this.#listDestinations = [...this.#pointsModel.destinatinations];
 
     render(this.#listComponent, this.#listContainer); // ul, куда будут отрисованы li
-    render(new NewPointView(), this.#listComponent.element, 'beforebegin'); //создание новой точки
 
-    for (let i = 0; i < this.#listPoints.length; i++) {
-      const offers = this.#listPoints[i].offers.map((offerId) => {
-        let result;
+    if (this.#listPoints.length === 0) {
+      render(new NoPointView(), this.#listComponent.element);
+    } else {
+      const tripMain = document.querySelector('.trip-main');
+      const tripEvents = document.querySelector('.trip-events');
 
-        this.#listOffers.forEach((offersGroup) => {
-          offersGroup.offers.forEach((offer) => {
-            if(offer.id === offerId) {
-              result = offer;
-            }
+      render(new InfoView(), tripMain, 'afterbegin');
+      render(new SortView(), tripEvents, 'afterbegin');
+      render(new NewPointView(), this.#listComponent.element); //создание новой точки
+
+      for (let i = 0; i < this.#listPoints.length; i++) {
+        const offers = this.#listPoints[i].offers.map((offerId) => {
+          let result;
+
+          this.#listOffers.forEach((offersGroup) => {
+            offersGroup.offers.forEach((offer) => {
+              if(offer.id === offerId) {
+                result = offer;
+              }
+            });
           });
-        });
 
-        return result;
+          return result;
+        }
+        );
+
+        const destination = this.#listDestinations.find((destinationItem) => destinationItem.name === this.#listPoints[i].destination);
+
+        this.#renderPoint(this.#listPoints[i], offers, destination); //перечисление точек маршрута
       }
-      );
-      const destination = this.#listDestinations.find((destinationItem) => destinationItem.name === this.#listPoints[i].destination);
-
-      this.#renderPoint(this.#listPoints[i], offers, destination); //перечисление точек маршрута
-      //render(new EditPointView(this.#listPoints[i], this.#listOffers, destination), this.#listComponent.element); //редактирование точки
     }
   };
 
