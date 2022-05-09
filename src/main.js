@@ -14,6 +14,6 @@ const tripEvents = document.querySelector('.trip-events');
 
 render(new FilterView(), tripFilters);
 const pointsModel = new PointsModel();
-const listPointPresenter = new ListPointPresenter();
+const listPointPresenter = new ListPointPresenter(tripEvents, pointsModel);
 
-listPointPresenter.init(tripEvents, pointsModel);
+listPointPresenter.init();

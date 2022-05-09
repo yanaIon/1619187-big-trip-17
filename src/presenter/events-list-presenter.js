@@ -17,13 +17,20 @@ export default class ListPointPresenter {
   #listOffers = [];
   #listDestinations = [];
 
-  init = (listContainer, pointsModel) => {
+  constructor (listContainer, pointsModel) {
     this.#listContainer = listContainer;
     this.#pointsModel = pointsModel;
+  }
+
+  init = () => {
     this.#listPoints = [...this.#pointsModel.points];
     this.#listOffers = [...this.#pointsModel.offer];
     this.#listDestinations = [...this.#pointsModel.destinatinations];
 
+    this.#renderListPoint();
+  };
+
+  #renderListPoint = () => {
     render(this.#listComponent, this.#listContainer); // ul, куда будут отрисованы li
 
     if (this.#listPoints.length === 0) {
