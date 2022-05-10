@@ -66,8 +66,8 @@ export default class ListPointPresenter {
     }
   };
 
-  #renderPoint = (point,offer,destination) => {
-    const pointComponent = new PointView(point,offer);
+  #renderPoint = (point,offers,destination) => {
+    const pointComponent = new PointView(point,offers);
     const editPointComponent = new EditPointView(point, this.#listOffers, destination);
 
     const replacePointToForm = () => {
