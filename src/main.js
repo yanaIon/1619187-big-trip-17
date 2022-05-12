@@ -1,4 +1,4 @@
-import {render} from './render.js';
+import {render} from './framework/render.js';
 import ListPointPresenter from './presenter/events-list-presenter.js';
 import PointsModel from './model/points-model.js';
 import duration from 'dayjs/plugin/duration';
