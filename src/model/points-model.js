@@ -7,6 +7,16 @@ export default class PointsModel {
   #offers = offers;
   #destinations = Array.from({length: 1}, generateDestination);
 
+  updatePoint(updatedPoint) {
+    this.#points = this.#points.map((point) => {
+      if (updatedPoint.id === point.id) {
+        return updatedPoint;
+      } else {
+        return point;
+      }
+    });
+  }
+
   get points() {
     return this.#points;
   }
