@@ -2,4 +2,10 @@ const TYPE = ['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'si
 
 const CITY = ['Chamonix', 'Geneva', 'Amsterdam'];
 
-export {TYPE, CITY};
+const FilterType = {
+  EVERYTHING: 'everything',
+  FUTURE: 'future',
+  PAST: 'past',
+};
+
+export {TYPE, CITY, FilterType};
