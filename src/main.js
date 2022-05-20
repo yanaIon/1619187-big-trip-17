@@ -3,7 +3,7 @@ import ListPointPresenter from './presenter/events-list-presenter.js';
 import PointsModel from './model/points-model.js';
 import duration from 'dayjs/plugin/duration';
 import dayjs from 'dayjs';
-import {generateFilter} from './mock/filter.js';
+import {generateFilter} from './util.js';
 import FilterView from './view/filter-view.js';
 
 dayjs.extend(duration);

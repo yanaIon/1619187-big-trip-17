@@ -1,21 +1,25 @@
-import {render, RenderPosition} from '../framework/render.js';
+import {remove, render, RenderPosition} from '../framework/render.js';
 import NewPointView from '../view/add-new-point-view.js';
 import ListPointView from '../view/list-point-view.js';
 import NoPointView from '../view/no-point-view.js';
 import InfoView from '../view/trip-info-view.js';
 import SortView from '../view/sort-view.js';
 import PointPresenter from './point-presenter.js';
+import {sortPointsByDuration, sortPointsByPrice} from '../util.js';
+import {SortType} from '../const.js';
 export default class ListPointPresenter {
   #listContainer = null;
   #pointsModel = null;
 
   #listComponent = new ListPointView();
-  #sortComponent = new SortView();
   #noPointComponent = new NoPointView();
+  #currentSortType = SortType.DAY;
+  #sortComponent = null;
 
   #listPoints = [];
   #listOffers = [];
   #listDestinations = [];
+  #soursedListPoints = [];
 
   #pointPresenters = new Map();
 
@@ -29,14 +33,15 @@ export default class ListPointPresenter {
     this.#listOffers = [...this.#pointsModel.offer];
     this.#listDestinations = [...this.#pointsModel.destinatinations];
 
-    this.#renderListPoint();
+    this.#soursedListPoints = [...this.#pointsModel.points];
+    this.#renderListContainer();
   };
 
   #handleModeChange = () => {
     this.#pointPresenters.forEach((presenter) => presenter.resetView());
   };
 
-  #renderListPoint = () => {
+  #renderListContainer = () => {
     render(this.#listComponent, this.#listContainer);
 
     if (this.#listPoints.length === 0) {
@@ -47,9 +52,13 @@ export default class ListPointPresenter {
       this.#renderSort();
       render(new NewPointView(), this.#listComponent.element);
 
-      for (let i = 0; i < this.#listPoints.length; i++) {
-        this.#renderPoint(this.#listPoints[i]);
-      }
+      this.#renderListPoint();
+    }
+  };
+
+  #renderListPoint = () => {
+    for (let i = 0; i < this.#listPoints.length; i++) {
+      this.#renderPoint(this.#listPoints[i]);
     }
   };
 
@@ -69,8 +78,43 @@ export default class ListPointPresenter {
     this.#pointPresenters.set(point.id, pointPresenter);
   };
 
+  #sortPoints = (sortType) => {
+
+    switch (sortType) {
+      case SortType.PRICE:
+        this.#listPoints.sort(sortPointsByPrice);
+        break;
+      case SortType.TIME:
+
+        this.#listPoints.sort(sortPointsByDuration);
+        break;
+      default:
+        this.#listPoints = [...this.#soursedListPoints];
+    }
+
+    this.#currentSortType = sortType;
+  };
+
+  #handleSortTypeChange = (sortType) => {
+    if (this.#currentSortType === sortType) {
+      return;
+    }
+
+    this.#sortPoints(sortType);
+    this.#renderSort();
+    this.#clearPointList();
+    this.#renderListPoint();
+  };
+
   #renderSort = () => {
-    render(this.#sortComponent, this.#listComponent.element, RenderPosition.AFTERBEGIN);
+    if(this.#sortComponent) {
+      this.#sortComponent.dispose();
+      remove(this.#sortComponent);
+    }
+    const sortView = new SortView(this.#currentSortType);
+    this.#sortComponent = sortView;
+    render(sortView, this.#listComponent.element, RenderPosition.AFTERBEGIN);
+    sortView.setSortTypeChangeHandler(this.#handleSortTypeChange);
   };
 
   #renderNoPoints = () => {
