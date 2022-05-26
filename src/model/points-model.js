@@ -17,6 +17,12 @@ export default class PointsModel {
     });
   }
 
+  addPoint(newPoint) {
+    this.#points.push(newPoint);
+
+    return this.#points;
+  }
+
   get points() {
     return this.#points;
   }
