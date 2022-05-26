@@ -38,20 +38,20 @@ export default class PointPresenter {
     }
     );
 
-    const destination = listDestinations.find((destinationItem) => destinationItem.name === this.#point.destination);
-
     const prevPointComponent = this.#pointComponent;
     const prevEditPointComponent = this.#editPointComponent;
 
     this.#pointComponent = new PointView(point,offers);
-    this.#editPointComponent = new EditPointView(point,listOffers, destination);
+    this.#editPointComponent = new EditPointView(point,listOffers, listDestinations);
 
     this.#pointComponent.setOpenEditFormClickHandler(() => {
       this.#replacePointToForm();
       document.addEventListener('keydown', this.#escKeyDownHandler);
     });
 
-    this.#editPointComponent.setFormSubmitHandler(() => {
+    this.#editPointComponent.setFormSubmitHandler((newPoint) => {
+      updatePointItem(newPoint);
+
       this.#replaceFormToPoint();
       document.removeEventListener('keydown', this.#escKeyDownHandler);
     });
@@ -86,6 +86,7 @@ export default class PointPresenter {
 
   resetView = () => {
     if (this.#mode !== Mode.DEFAULT) {
+      this.#editPointComponent.reset(this.#point);
       this.#replaceFormToPoint();
     }
   };
@@ -104,6 +105,7 @@ export default class PointPresenter {
   #escKeyDownHandler = (evt) => {
     if (evt.key === 'Escape' || evt.key === 'Esc') {
       evt.preventDefault();
+      this.#editPointComponent.reset(this.#point);
       this.#replaceFormToPoint();
       document.removeEventListener('keydown', this.#escKeyDownHandler);
     }

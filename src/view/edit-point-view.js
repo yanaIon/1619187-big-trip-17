@@ -1,4 +1,4 @@
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import {TYPE} from '../const.js';
 import {CITY} from '../const.js';
 import {humanizeDateWithTime} from '../util.js';
@@ -19,7 +19,7 @@ const createTypeDropdown = (currentType) => `
     ${TYPE.map((type) => `
     <div class="event__type-item">
     <input ${type === currentType ? 'checked' : ''} id="event-type-${type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}">
-    <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-1">${type}</label>
+    <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-1" data-event-type="${type}">${type}</label>
   </div>
   `).join('')}
   </fieldset>
@@ -27,8 +27,7 @@ const createTypeDropdown = (currentType) => `
 </div>
 `;
 
-const createFieldGroup = (type, currentDestination, destinationCity) =>
-  `<div class="event__field-group  event__field-group--destination">
+const createFieldGroup = (type, currentDestination, destinationCity) => `<div class="event__field-group  event__field-group--destination">
    <label class="event__label  event__type-output" for="event-destination-1">
      ${type}
    </label>
@@ -50,8 +49,9 @@ const createDestination = (currentDestination) =>
   </div>
 </div>`;
 
-const createEditPointTemplate = (point, offers, destination) => {
+const createEditPointTemplate = (point, offers, listDestinations) => {
   const {basePrice, dateFrom, dateTo, type} = point;
+  const destination = listDestinations.find((destinationItem) => destinationItem.name === point.destination);
 
   const dateStart = humanizeDateWithTime(dateFrom);
   const dateEnd = humanizeDateWithTime(dateTo);
@@ -123,26 +123,63 @@ const createEditPointTemplate = (point, offers, destination) => {
   );
 };
 
-export default class EditPointView extends AbstractView{
-  constructor(point, offers, destination) {
+export default class EditPointView extends AbstractStatefulView{
+  constructor(point, offers, listDestinations) {
     super();
-    this.point = point;
+    this.originPoint = point;
+    this._state = point;
     this.offers = offers;
-    this.destination = destination;
+    this.listDestinations = listDestinations;
+
+    this.#setInnerHandlers();
   }
 
   get template() {
-    return createEditPointTemplate(this.point, this.offers, this.destination);
+    return createEditPointTemplate(this._state, this.offers, this.listDestinations);
   }
 
+  _restoreHandlers = () => {
+    this.#setInnerHandlers();
+    this.setFormSubmitHandler(this._callback.formSubmit);
+  };
+
+  #selectTypeHandler = (evt) => {
+    evt.preventDefault();
+    this.updateElement({
+      type: evt.target.dataset.eventType,
+    });
+  };
+
+  #selectCityHandler = (evt) => {
+    evt.preventDefault();
+    this.updateElement({
+      destination: evt.target.value,
+    });
+  };
+
+  clonePoint = (point) => ({...point, offers:[...point.offers]});
+
   setFormSubmitHandler = (callback) => {
-    this._callback.formSubmit = callback;
+    this._callback.formSubmit = () => callback(this._state);
     this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
   };
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
     this._callback.formSubmit();
+  };
+
+  #setInnerHandlers = () => {
+    this.element.querySelector('.event__type-group')
+      .addEventListener('click', this.#selectTypeHandler);
+    this.element.querySelector('.event__input--destination')
+      .addEventListener('change', this.#selectCityHandler);
+  };
+
+  reset = () => {
+    this.updateElement(
+      this.originPoint,
+    );
   };
 
   setCloseEditFormClickHandler = (callback) => {
