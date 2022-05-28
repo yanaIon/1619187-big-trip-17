@@ -1,8 +1,10 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import {TYPE} from '../const.js';
 import {CITY} from '../const.js';
-import {humanizeDateWithTime} from '../util.js';
+//import {humanizeDateWithTime} from '../util.js';
+import flatpickr from 'flatpickr';
 
+import 'flatpickr/dist/flatpickr.min.css';
 
 const createTypeDropdown = (currentType) => `
 <div class="event__type-wrapper">
@@ -52,9 +54,8 @@ const createDestination = (currentDestination) =>
 const createPointTemplate = (point, offers, listDestinations) => {
   const {basePrice, dateFrom, dateTo, type} = point;
   const destination = listDestinations.find((destinationItem) => destinationItem.name === point.destination);
-
-  const dateStart = humanizeDateWithTime(dateFrom);
-  const dateEnd = humanizeDateWithTime(dateTo);
+  const dateStart = dateFrom;
+  const dateEnd = dateTo;
 
 
   const getOffersList = function (offersList, currentPoint) {
@@ -123,8 +124,8 @@ const createPointTemplate = (point, offers, listDestinations) => {
 const DEFAULT_STATE = {
   id: null,
   basePrice: null,
-  dateFrom: null,
-  dateTo: null,
+  dateFrom: new Date(),
+  dateTo: new Date(),
   isFavorite: false,
   destination: 'Chamonix',
   offers: [],
@@ -132,6 +133,8 @@ const DEFAULT_STATE = {
 };
 
 export default class NewPointEditorView extends AbstractStatefulView{
+  #datepicker = null;
+
   constructor(offers, listDestinations) {
     super();
     this._state = { ...DEFAULT_STATE };
@@ -139,14 +142,62 @@ export default class NewPointEditorView extends AbstractStatefulView{
     this.listDestinations = listDestinations;
 
     this.#setInnerHandlers();
+    this.#setDatepickerFrom();
+    this.#setDatepickerTo();
   }
 
   get template() {
     return createPointTemplate(this._state, this.offers, this.listDestinations);
   }
 
+  removeElement = () => {
+    super.removeElement();
+
+    if (this.#datepicker) {
+      this.#datepicker.destroy();
+      this.#datepicker = null;
+    }
+  };
+
+  #dateFromChangeHandler = ([userDate]) => {
+    this.updateElement({
+      dateFrom: userDate,
+    });
+
+  };
+
+  #dateToChangeHandler = ([userDate]) => {
+    this.updateElement({
+      dateTo: userDate,
+    });
+  };
+
+  #setDatepickerFrom = () => {
+    this.#datepicker = flatpickr(
+      this.element.querySelector('#event-start-time-0'),
+      {
+        enableTime: true,
+        dateFormat: 'd/m/y H:i',
+        onChange: this.#dateFromChangeHandler,
+      },
+    );
+  };
+
+  #setDatepickerTo = () => {
+    this.#datepicker = flatpickr(
+      this.element.querySelector('#event-end-time-0'),
+      {
+        enableTime: true,
+        dateFormat: 'd/m/y H:i',
+        onChange: this.#dateToChangeHandler,
+      },
+    );
+  };
+
   _restoreHandlers = () => {
     this.#setInnerHandlers();
+    this.#setDatepickerFrom();
+    this.#setDatepickerTo();
     this.setFormSubmitHandler(this._callback.formSubmit);
   };
 

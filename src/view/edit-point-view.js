@@ -2,7 +2,9 @@ import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import {TYPE} from '../const.js';
 import {CITY} from '../const.js';
 import {humanizeDateWithTime} from '../util.js';
+import flatpickr from 'flatpickr';
 
+import 'flatpickr/dist/flatpickr.min.css';
 
 const createTypeDropdown = (currentType) => `
 <div class="event__type-wrapper">
@@ -124,6 +126,8 @@ const createEditPointTemplate = (point, offers, listDestinations) => {
 };
 
 export default class EditPointView extends AbstractStatefulView{
+  #datepicker = null;
+
   constructor(point, offers, listDestinations) {
     super();
     this.originPoint = point;
@@ -132,14 +136,63 @@ export default class EditPointView extends AbstractStatefulView{
     this.listDestinations = listDestinations;
 
     this.#setInnerHandlers();
+    this.#setDatepickerFrom();
+    this.#setDatepickerTo();
   }
 
   get template() {
     return createEditPointTemplate(this._state, this.offers, this.listDestinations);
   }
 
+  removeElement = () => {
+    super.removeElement();
+
+    if (this.#datepicker) {
+      this.#datepicker.destroy();
+      this.#datepicker = null;
+    }
+  };
+
+  #dateFromChangeHandler = ([userDate]) => {
+    this.updateElement({
+      dateFrom: userDate,
+    });
+  };
+
+  #dateToChangeHandler = ([userDate]) => {
+    this.updateElement({
+      dateTo: userDate,
+    });
+  };
+
+  #setDatepickerFrom = () => {
+    this.#datepicker = flatpickr(
+      this.element.querySelector('#event-start-time-1'),
+      {
+        enableTime: true,
+        dateFormat: 'd/m/y H:i',
+        defaultDate: this._state.dateFrom,
+        onChange: this.#dateFromChangeHandler,
+      },
+    );
+  };
+
+  #setDatepickerTo = () => {
+    this.#datepicker = flatpickr(
+      this.element.querySelector('#event-end-time-1'),
+      {
+        enableTime: true,
+        dateFormat: 'd/m/y H:i',
+        defaultDate: this._state.dateTo,
+        onChange: this.#dateToChangeHandler,
+      },
+    );
+  };
+
   _restoreHandlers = () => {
     this.#setInnerHandlers();
+    this.#setDatepickerFrom();
+    this.#setDatepickerTo();
     this.setFormSubmitHandler(this._callback.formSubmit);
   };
 
