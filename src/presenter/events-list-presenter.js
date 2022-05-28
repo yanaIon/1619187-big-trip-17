@@ -1,5 +1,5 @@
 import {remove, render, RenderPosition} from '../framework/render.js';
-import NewPointEditorView from '../view/add-new-point-view.js';
+import NewPointEditorView from '../view/new-point-editor-view.js';
 import ListPointView from '../view/list-point-view.js';
 import NoPointView from '../view/no-point-view.js';
 import InfoView from '../view/trip-info-view.js';

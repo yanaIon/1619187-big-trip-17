@@ -6,6 +6,18 @@ import flatpickr from 'flatpickr';
 
 import 'flatpickr/dist/flatpickr.min.css';
 
+const DEFAULT_STATE = {
+  id: null,
+  basePrice: null,
+  dateFrom: new Date(),
+  dateTo: new Date(),
+  isFavorite: false,
+  destination: 'Chamonix',
+  offers: [],
+  type: 'taxi',
+};
+
+
 const createTypeDropdown = (currentType) => `
 <div class="event__type-wrapper">
 <label class="event__type  event__type-btn" for="event-type-toggle-0">
@@ -121,17 +133,6 @@ const createPointTemplate = (point, offers, listDestinations) => {
   );
 };
 
-const DEFAULT_STATE = {
-  id: null,
-  basePrice: null,
-  dateFrom: new Date(),
-  dateTo: new Date(),
-  isFavorite: false,
-  destination: 'Chamonix',
-  offers: [],
-  type: 'taxi',
-};
-
 export default class NewPointEditorView extends AbstractStatefulView{
   #datepicker = null;
 
@@ -223,22 +224,28 @@ export default class NewPointEditorView extends AbstractStatefulView{
   };
 
   setFormOpenHandler = (callback) => {
-    this._callback.formOpen = (e) => {
-      e.preventDefault();
-      callback();
-    };
-    document.querySelector('.trip-main__event-add-btn').addEventListener('click', this._callback.formOpen);
+    this._callback.formOpen = callback;
+
+    document.querySelector('.trip-main__event-add-btn').addEventListener('click', this.#formOpenHandler);
   };
 
+  #formOpenHandler = (evt) => {
+    evt.preventDefault();
+    if (typeof this._callback.formOpen === 'function') {
+      this._callback.formOpen();
+    }
+  };
 
   setFormCloseHandler = (callback) => {
-    this._callback.formClose = (evt) => {
-      if(evt.key === 'Escape' || evt.key === 'Esc') {
-        callback();
-      }
+    this._callback.formClose = callback;
 
-    };
-    document.addEventListener('keydown', this._callback.formClose);
+    document.addEventListener('keydown', this.#formCloseHandler);
+  };
+
+  #formCloseHandler = (evt) => {
+    if (typeof this._callback.formClose === 'function' && (evt.key === 'Escape' || evt.key === 'Esc')) {
+      this._callback.formClose();
+    }
   };
 
   #formSubmitHandler = (evt) => {
