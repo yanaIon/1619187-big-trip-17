@@ -1,5 +1,5 @@
 import {remove, render, RenderPosition} from '../framework/render.js';
-import NewPointView from '../view/add-new-point-view.js';
+import NewPointEditorView from '../view/new-point-editor-view.js';
 import ListPointView from '../view/list-point-view.js';
 import NoPointView from '../view/no-point-view.js';
 import InfoView from '../view/trip-info-view.js';
@@ -15,6 +15,7 @@ export default class ListPointPresenter {
   #noPointComponent = new NoPointView();
   #currentSortType = SortType.DAY;
   #sortComponent = null;
+  #newPointEditorView = null;
 
   #listPoints = [];
   #listOffers = [];
@@ -34,6 +35,38 @@ export default class ListPointPresenter {
     this.#listDestinations = [...this.#pointsModel.destinatinations];
 
     this.#soursedListPoints = [...this.#pointsModel.points];
+
+    /** Форма добавления */
+    this.#newPointEditorView = new NewPointEditorView(this.#listOffers, this.#listDestinations);
+
+    this.#newPointEditorView.setFormSubmitHandler((newPoint) => {
+      this.#addPointItem(newPoint);
+      this.#newPointEditorView.reset();
+      remove(this.#newPointEditorView);
+      this.#newPointEditorView = null;
+    });
+
+    this.#newPointEditorView.setFormCloseHandler(() => {
+      this.#newPointEditorView.reset();
+      remove(this.#newPointEditorView);
+      this.#newPointEditorView = null;
+    });
+
+    this.#newPointEditorView.setFormOpenHandler(() => {
+      if(this.#newPointEditorView) {
+        return;
+      }
+      this.#newPointEditorView = new NewPointEditorView(this.#listOffers, this.#listDestinations);
+      this.#newPointEditorView.setFormSubmitHandler((newPoint) => {
+        this.#addPointItem(newPoint);
+        this.#newPointEditorView.reset();
+        remove(this.#newPointEditorView);
+        this.#newPointEditorView = null;
+      });
+      render(this.#newPointEditorView, this.#listComponent.element, RenderPosition.BEFOREBEGIN);
+    });
+    /** Форма добавления */
+
     this.#renderListContainer();
   };
 
@@ -50,7 +83,8 @@ export default class ListPointPresenter {
       const tripMain = document.querySelector('.trip-main');
       render(new InfoView(), tripMain, 'afterbegin');
       this.#renderSort();
-      render(new NewPointView(), this.#listComponent.element);
+
+      render(this.#newPointEditorView, this.#listComponent.element);
 
       this.#renderListPoint();
     }
@@ -70,6 +104,14 @@ export default class ListPointPresenter {
   #updatePointItem = (updatedPoint) => {
     this.#pointsModel.updatePoint(updatedPoint);
     this.#pointPresenters.get(updatedPoint.id).init(updatedPoint, this.#listOffers, this.#listDestinations, this.#updatePointItem);
+  };
+
+  #addPointItem = (newPoint) => {
+    const updatedList = this.#pointsModel.addPoint(newPoint);
+    this.#listPoints = [...updatedList];
+    this.#clearPointList();
+    this.#renderListPoint();
+
   };
 
   #renderPoint = (point) => {
