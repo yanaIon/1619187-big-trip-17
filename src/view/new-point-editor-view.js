@@ -216,7 +216,7 @@ export default class NewPointEditorView extends AbstractStatefulView{
     });
   };
 
-  clonePoint = (point) => ({...point, offers:[...point.offers]});
+  //clonePoint = (point) => ({...point, offers:[...point.offers]});
 
   setFormSubmitHandler = (callback) => {
     this._callback.formSubmit = () => callback(this._state);
