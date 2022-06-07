@@ -5,136 +5,101 @@ import NoPointView from '../view/no-point-view.js';
 import InfoView from '../view/trip-info-view.js';
 import SortView from '../view/sort-view.js';
 import PointPresenter from './point-presenter.js';
-import {sortPointsByDuration, sortPointsByPrice} from '../util.js';
+import {sortPointsByDuration, sortPointsByPrice, filter} from '../util.js';
 import {SortType} from '../const.js';
+import {UserAction, UpdateType} from '../const.js';
+
 export default class ListPointPresenter {
   #listContainer = null;
   #pointsModel = null;
+  #filterModel = null;
 
   #listComponent = new ListPointView();
-  #noPointComponent = new NoPointView();
+  #noPointComponent = null;
   #currentSortType = SortType.DAY;
   #sortComponent = null;
   #newPointEditorView = null;
+  #infoView = null;
 
-  #listPoints = [];
   #listOffers = [];
   #listDestinations = [];
-  #soursedListPoints = [];
 
   #pointPresenters = new Map();
 
-  constructor (listContainer, pointsModel) {
+  constructor (listContainer, pointsModel, filterModel) {
     this.#listContainer = listContainer;
     this.#pointsModel = pointsModel;
+    this.#filterModel = filterModel;
+
+    this.#pointsModel.addObserver(this.#handleModelEvent);
+    this.#filterModel.addObserver(this.#handleModelEvent);
   }
 
+  get points() {
+    const points = filter[this.#filterModel.filter](this.#pointsModel.points);
+    switch (this.#currentSortType) {
+      case SortType.PRICE:
+        return [...points].sort(sortPointsByPrice);
+      case SortType.TIME:
+        return [...points].sort(sortPointsByDuration);
+    }
+    return points;
+  }
+
+
+  #handleViewAction = (actionType, updateType, update) => {
+    switch (actionType) {
+      case UserAction.UPDATE_TASK:
+        this.#pointsModel.updatePoint(updateType, update);
+        break;
+      case UserAction.ADD_TASK:
+        this.#pointsModel.addPoint(updateType, update);
+        break;
+      case UserAction.DELETE_TASK:
+        this.#pointsModel.deletePoint(updateType, update);
+        break;
+    }
+  };
+
+  #handleModelEvent = (updateType, data) => {
+    switch (updateType) {
+      case UpdateType.PATCH:
+        // - обновить часть списка (например, когда поменялось описание)
+        this.#pointPresenters.get(data.id).init(data, this.#listOffers, this.#listDestinations);
+        break;
+      case UpdateType.MINOR:
+        this.#clearBoard();
+        this.#renderBoard();
+        break;
+      case UpdateType.MAJOR:
+        this.#clearBoard({resetSortType: true});
+        this.#renderBoard();
+        break;
+    }
+  };
+
   init = () => {
-    this.#listPoints = [...this.#pointsModel.points];
     this.#listOffers = [...this.#pointsModel.offer];
     this.#listDestinations = [...this.#pointsModel.destinatinations];
 
-    this.#soursedListPoints = [...this.#pointsModel.points];
-
-    /** Форма добавления */
-    this.#newPointEditorView = new NewPointEditorView(this.#listOffers, this.#listDestinations);
-
-    this.#newPointEditorView.setFormSubmitHandler((newPoint) => {
-      this.#addPointItem(newPoint);
-      this.#newPointEditorView.reset();
-      remove(this.#newPointEditorView);
-      this.#newPointEditorView = null;
-    });
-
-    this.#newPointEditorView.setFormCloseHandler(() => {
-      this.#newPointEditorView.reset();
-      remove(this.#newPointEditorView);
-      this.#newPointEditorView = null;
-    });
-
-    this.#newPointEditorView.setFormOpenHandler(() => {
-      if(this.#newPointEditorView) {
-        return;
-      }
-      this.#newPointEditorView = new NewPointEditorView(this.#listOffers, this.#listDestinations);
-      this.#newPointEditorView.setFormSubmitHandler((newPoint) => {
-        this.#addPointItem(newPoint);
-        this.#newPointEditorView.reset();
-        remove(this.#newPointEditorView);
-        this.#newPointEditorView = null;
-      });
-      render(this.#newPointEditorView, this.#listComponent.element, RenderPosition.BEFOREBEGIN);
-    });
-    /** Форма добавления */
-
-    this.#renderListContainer();
+    this.#renderBoard();
   };
 
   #handleModeChange = () => {
     this.#pointPresenters.forEach((presenter) => presenter.resetView());
   };
 
-  #renderListContainer = () => {
-    render(this.#listComponent, this.#listContainer);
-
-    if (this.#listPoints.length === 0) {
-      this.#renderNoPoints();
-    } else {
-      const tripMain = document.querySelector('.trip-main');
-      render(new InfoView(), tripMain, 'afterbegin');
-      this.#renderSort();
-
-      render(this.#newPointEditorView, this.#listComponent.element);
-
-      this.#renderListPoint();
-    }
-  };
-
   #renderListPoint = () => {
-    for (let i = 0; i < this.#listPoints.length; i++) {
-      this.#renderPoint(this.#listPoints[i]);
+    for (let i = 0; i < this.points.length; i++) {
+      this.#renderPoint(this.points[i]);
     }
-  };
-
-  #clearPointList = () => {
-    this.#pointPresenters.forEach((presenter) => presenter.destroy());
-    this.#pointPresenters.clear();
-  };
-
-  #updatePointItem = (updatedPoint) => {
-    this.#pointsModel.updatePoint(updatedPoint);
-    this.#pointPresenters.get(updatedPoint.id).init(updatedPoint, this.#listOffers, this.#listDestinations, this.#updatePointItem);
-  };
-
-  #addPointItem = (newPoint) => {
-    const updatedList = this.#pointsModel.addPoint(newPoint);
-    this.#listPoints = [...updatedList];
-    this.#clearPointList();
-    this.#renderListPoint();
-
   };
 
   #renderPoint = (point) => {
-    const pointPresenter = new PointPresenter(this.#listComponent.element, this.#handleModeChange);
-    pointPresenter.init(point, this.#listOffers, this.#listDestinations, this.#updatePointItem);
+    const pointPresenter = new PointPresenter(this.#listComponent.element, this.#handleViewAction ,this.#handleModeChange);
+
+    pointPresenter.init(point, this.#listOffers, this.#listDestinations);
     this.#pointPresenters.set(point.id, pointPresenter);
-  };
-
-  #sortPoints = (sortType) => {
-
-    switch (sortType) {
-      case SortType.PRICE:
-        this.#listPoints.sort(sortPointsByPrice);
-        break;
-      case SortType.TIME:
-
-        this.#listPoints.sort(sortPointsByDuration);
-        break;
-      default:
-        this.#listPoints = [...this.#soursedListPoints];
-    }
-
-    this.#currentSortType = sortType;
   };
 
   #handleSortTypeChange = (sortType) => {
@@ -142,10 +107,10 @@ export default class ListPointPresenter {
       return;
     }
 
-    this.#sortPoints(sortType);
-    this.#renderSort();
-    this.#clearPointList();
-    this.#renderListPoint();
+    this.#currentSortType = sortType;
+
+    this.#clearBoard();
+    this.#renderBoard();
   };
 
   #renderSort = () => {
@@ -159,7 +124,78 @@ export default class ListPointPresenter {
     sortView.setSortTypeChangeHandler(this.#handleSortTypeChange);
   };
 
-  #renderNoPoints = () => {
+  #renderNoPoints = (text) => {
+    this.#noPointComponent = new NoPointView(text);
     render(this.#noPointComponent, this.#listComponent.element, RenderPosition.AFTERBEGIN);
+  };
+
+  #clearBoard = ({ resetSortType = false} = {}) => {
+    this.#pointPresenters.forEach((presenter) => presenter.destroy());
+    this.#pointPresenters.clear();
+
+    remove(this.#sortComponent);
+    remove(this.#infoView);
+
+
+    if (this.#noPointComponent) {
+      remove(this.#noPointComponent);
+    }
+
+    if(this.#newPointEditorView) {
+      remove(this.#newPointEditorView);
+    }
+
+    if (resetSortType) {
+      this.#currentSortType = SortType.DEFAULT;
+    }
+  };
+
+  #renderBoard = () => {
+    render(this.#listComponent, this.#listContainer);
+
+    const points = this.points;
+    const currentFilter = this.#filterModel.filter;
+    const text = this.#filterModel.noPointTextByFilter[currentFilter];
+
+    if (points.length === 0) {
+      this.#renderNoPoints(text);
+      return;
+    }
+
+    const tripMain = document.querySelector('.trip-main');
+    this.#infoView = new InfoView();
+
+    render(this.#infoView, tripMain, 'afterbegin');
+    this.#renderSort();
+
+
+    this.#renderListPoint();
+
+  };
+
+  createPoint = (cb) => {
+    /** Форма добавления */
+    this.#newPointEditorView = new NewPointEditorView(this.#listOffers, this.#listDestinations);
+
+
+    this.#newPointEditorView.setFormSubmitHandler((update) => {
+      this.#handleViewAction(UserAction.ADD_TASK, UpdateType.MINOR, update);
+
+      remove(this.#newPointEditorView);
+      this.#newPointEditorView = null;
+      cb();
+    });
+
+    this.#newPointEditorView.setFormCloseHandler(() => {
+
+      remove(this.#newPointEditorView);
+      this.#newPointEditorView = null;
+      cb();
+    });
+
+    render(this.#newPointEditorView, this.#listComponent.element, RenderPosition.BEFOREBEGIN);
+
+    /** Форма добавления */
+
   };
 }

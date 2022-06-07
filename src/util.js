@@ -3,6 +3,7 @@ import {FilterType} from './const.js';
 
 const humanizeTime = (date) => dayjs(date).format('HH:hh');
 const humanizeDateWithTime = (date) => dayjs(date).format('DD/MM/YYYY HH:mm');
+
 const humanizeDateMonthAndDay= (date) => dayjs(date).format('MMM D');
 const humanizeDateWIithoutTime = (date) => dayjs(date).format('YYYY-MM-DD');
 
@@ -62,4 +63,4 @@ const getRandomInteger = (a = 0, b = 1) => {
 };
 
 
-export {humanizeTime, humanizeDateWithTime, humanizeDateMonthAndDay, humanizeDateWIithoutTime, getRandomInteger, generateFilter, sortPointsByDuration, sortPointsByPrice};
+export {humanizeTime, humanizeDateWithTime, humanizeDateMonthAndDay, humanizeDateWIithoutTime, getRandomInteger, generateFilter, sortPointsByDuration, sortPointsByPrice, filter};

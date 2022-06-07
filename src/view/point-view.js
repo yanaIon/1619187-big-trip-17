@@ -86,7 +86,7 @@ export default class PointView extends AbstractView{
   };
 
   #favoritePointClickHandler = () => {
-    this._callback.favoritePointClick({...this.point, isFavorite:!this.point.isFavorite});
+    this._callback.favoritePointClick();
   };
 
   #openEditFormClickHandler = () => {

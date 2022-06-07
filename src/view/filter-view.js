@@ -15,15 +15,16 @@ const createFilterItemTemplate = (filter, isChecked) => {
     ${count === 0 ? 'disabled' : ''}
     />
     <label
+    ${count === 0 ? 'disabled' : ''}
     class="trip-filters__filter-label"
     for="filter__${name}">${name}
     </label>
     </div>`);
 };
 
-const createFilterTemplate = (filterItems) => {
+const createFilterTemplate = (filterItems, currentFilter) => {
   const filterItemsTemplate = filterItems
-    .map((filter, index) => createFilterItemTemplate(filter, index === 0))
+    .map((filter) => createFilterItemTemplate(filter, currentFilter === filter.name))
     .join('');
 
   return `<form class="trip-filters" action="#" method="get">
@@ -33,13 +34,27 @@ const createFilterTemplate = (filterItems) => {
 
 export default class FilterView extends AbstractView {
   #filters = null;
+  #currentFilter = null;
 
-  constructor(filters) {
+  constructor(filters, currentFilter) {
     super();
     this.#filters = filters;
+    this.#currentFilter = currentFilter;
   }
 
   get template() {
-    return createFilterTemplate(this.#filters);
+    return createFilterTemplate(this.#filters, this.#currentFilter);
   }
+
+  setClickHandler = (callback) => {
+    this._callback.click = callback;
+    this.element.addEventListener('click', this.#clickHandler);
+  };
+
+  #clickHandler = (evt) => {
+    evt.preventDefault();
+
+    if(evt.target.attributes.disabled || !evt.target.htmlFor) { return; }
+    this._callback.click(evt);
+  };
 }

@@ -1,6 +1,7 @@
 import {render, replace, remove} from '../framework/render.js';
 import PointView from '../view/point-view.js';
 import EditPointView from '../view/edit-point-view.js';
+import {UserAction, UpdateType} from '../const.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -13,14 +14,16 @@ export default class PointPresenter {
   #editPointComponent = null;
   #point = null;
   #changeMode = null;
+  #changeData = null;
   #mode = Mode.DEFAULT;
 
-  constructor(pointListContainer, changeMode) {
+  constructor(pointListContainer,changeData, changeMode) {
     this.#pointListContainer = pointListContainer;
     this.#changeMode = changeMode;
+    this.#changeData = changeData;
   }
 
-  init = (point, listOffers, listDestinations, updatePointItem) => {
+  init = (point, listOffers, listDestinations) => {
     this.#point = point;
 
     const offers = this.#point.offers.map((offerId) => {
@@ -49,19 +52,14 @@ export default class PointPresenter {
       document.addEventListener('keydown', this.#escKeyDownHandler);
     });
 
-    this.#editPointComponent.setFormSubmitHandler((newPoint) => {
-      updatePointItem(newPoint);
-
-      this.#replaceFormToPoint();
-      document.removeEventListener('keydown', this.#escKeyDownHandler);
-    });
-
+    this.#editPointComponent.setFormSubmitHandler(this.#handleFormSubmit);
+    this.#editPointComponent.setPointDeleteHandler(this.#handleDeletePoint);
     this.#editPointComponent.setCloseEditFormClickHandler(() => {
-      this.#replaceFormToPoint();
+      this.resetView();
       document.removeEventListener('keydown', this.#escKeyDownHandler);
     });
 
-    this.#pointComponent.setFavoritePointClickHandler(updatePointItem);
+    this.#pointComponent.setFavoritePointClickHandler(this.#handleFavoriteClick);
 
     if (prevPointComponent === null || prevEditPointComponent === null) {
       render(this.#pointComponent, this.#pointListContainer);
@@ -109,5 +107,35 @@ export default class PointPresenter {
       this.#replaceFormToPoint();
       document.removeEventListener('keydown', this.#escKeyDownHandler);
     }
+  };
+
+  #handleFavoriteClick = () => {
+    this.#changeData(
+      UserAction.UPDATE_TASK,
+      UpdateType.MINOR,
+      {...this.#point, isFavorite: !this.#point.isFavorite},
+    );
+  };
+
+  #handleFormSubmit = (update) => {
+    this.#changeData(
+      UserAction.UPDATE_TASK,
+      UpdateType.MINOR,
+      update,
+    );
+
+    this.#replaceFormToPoint();
+    document.removeEventListener('keydown', this.#escKeyDownHandler);
+  };
+
+
+  #handleDeletePoint = () => {
+    this.#changeData(
+      UserAction.DELETE_TASK,
+      UpdateType.MINOR,
+      this.#point,
+    );
+
+    document.removeEventListener('keydown', this.#escKeyDownHandler);
   };
 }

@@ -42,16 +42,15 @@ const createTypeDropdown = (currentType) => `
 `;
 
 const createFieldGroup = (type, currentDestination, destinationCity) => `<div class="event__field-group  event__field-group--destination">
-   <label class="event__label  event__type-output" for="event-destination-0">
-     ${type}
-   </label>
-   <input class="event__input  event__input--destination" id="event-destination-0" type="text" name="event-destination" value="${currentDestination.name}" list="destination-list-0">
-   <datalist id="destination-list-0">
-   ${destinationCity.map((city)=>
-    `<option value="${city}"></option>`
+<label class="event__label  event__type-output" for="event-destination-1">
+${type}
+</label>
+<select value="${currentDestination.name}"  class="event__input  event__input--destination" id="destination-list-1">
+${destinationCity.map((city)=>
+    `<option value="${city}" ${city === currentDestination.name ? 'selected':''}>${city}</option>`
   ).join('')}
-   </datalist>
- </div>`;
+</select>
+</div>`;
 
 const createDestination = (currentDestination) =>
   `<p class="event__destination-description">${currentDestination.description}</p>
@@ -108,7 +107,7 @@ const createPointTemplate = (point, offers, listDestinations) => {
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-0" type="text" name="event-price" value="${basePrice}">
+          <input class="event__input  event__input--price" id="event-price-0" type="number" name="event-price" value="${basePrice}">
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -216,8 +215,6 @@ export default class NewPointEditorView extends AbstractStatefulView{
     });
   };
 
-  //clonePoint = (point) => ({...point, offers:[...point.offers]});
-
   setFormSubmitHandler = (callback) => {
     this._callback.formSubmit = () => callback(this._state);
     this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
@@ -253,11 +250,27 @@ export default class NewPointEditorView extends AbstractStatefulView{
     this._callback.formSubmit();
   };
 
+
+  #setPrice = (evt) => {
+    this.updateElement({
+      basePrice: Number(evt.target.value),
+    });
+
+    const input = this.element.querySelector('#event-price-0');
+    input.setAttribute('type', 'text');
+    const end = input.value.length;
+    input.setSelectionRange(end, end);
+    input.focus();
+    input.setAttribute('type', 'number');
+  };
+
   #setInnerHandlers = () => {
     this.element.querySelector('.event__type-group')
       .addEventListener('click', this.#selectTypeHandler);
     this.element.querySelector('.event__input--destination')
       .addEventListener('change', this.#selectCityHandler);
+
+    this.element.querySelector('#event-price-0').addEventListener('change', this.#setPrice);
   };
 
   reset = () => {
