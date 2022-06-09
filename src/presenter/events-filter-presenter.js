@@ -19,12 +19,8 @@ export default class ListPointPresenter {
     this.#pointsModel.addObserver(this.#handleModelEvent);
   }
 
-  #handleViewAction = (actionType, update) => {
-    switch (actionType) {
-      case UserAction.UPDATE_FILTER:
-        this.#filterModel.updateFilter(UpdateType.MAJOR, update);
-        break;
-    }
+  #handleViewAction = (_, update) => {
+    this.#filterModel.updateFilter(UpdateType.MAJOR, update);
   };
 
   #handleModelEvent = (updateType) => {
@@ -53,8 +49,8 @@ export default class ListPointPresenter {
   #renderFilters = () => {
     this.#filterComponent = new FilterView(generateFilter(this.#pointsModel.points), this.#filterModel.filter);
 
-    this.#filterComponent.setClickHandler((evt) => {
-      this.#handleViewAction(UserAction.UPDATE_FILTER, evt.target.htmlFor.split('__')[1]);
+    this.#filterComponent.setClickHandler((filter) => {
+      this.#handleViewAction(UserAction.UPDATE_FILTER, filter);
     });
 
     render(this.#filterComponent, this.#filterContainer);

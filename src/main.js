@@ -34,10 +34,10 @@ const handleNewPointFormClose = () => {
 };
 
 
-const handleNewTaskButtonClick = () => {
+const handleNewPointButtonClick = () => {
   listPointPresenter.createPoint(handleNewPointFormClose);
   newPointButtonComponent.element.disabled = true;
 };
-newPointButtonComponent.setClickHandler(handleNewTaskButtonClick);
+newPointButtonComponent.setClickHandler(handleNewPointButtonClick);
 
 render(newPointButtonComponent, tripMain);

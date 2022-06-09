@@ -55,6 +55,8 @@ export default class FilterView extends AbstractView {
     evt.preventDefault();
 
     if(evt.target.attributes.disabled || !evt.target.htmlFor) { return; }
-    this._callback.click(evt);
+
+    const filter = evt.target.htmlFor.split('__')[1];
+    this._callback.click(filter);
   };
 }

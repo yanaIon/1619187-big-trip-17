@@ -90,8 +90,10 @@ export default class ListPointPresenter {
   };
 
   #renderListPoint = () => {
-    for (let i = 0; i < this.points.length; i++) {
-      this.#renderPoint(this.points[i]);
+    const points = [...this.points];
+
+    for (let i = 0; i < points.length; i++) {
+      this.#renderPoint(points[i]);
     }
   };
 
@@ -175,6 +177,8 @@ export default class ListPointPresenter {
 
   createPoint = (cb) => {
     /** Форма добавления */
+    this.#pointPresenters.forEach((presenter) => presenter.resetView());
+
     this.#newPointEditorView = new NewPointEditorView(this.#listOffers, this.#listDestinations);
 
 
