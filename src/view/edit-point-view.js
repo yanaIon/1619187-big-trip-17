@@ -225,16 +225,16 @@ export default class EditPointView extends AbstractStatefulView{
 
 
   #setPrice = (evt) => {
-    // this.updateElement({
-    //   basePrice: Number(evt.target.value),
-    // });
+    this.updateElement({
+      basePrice: Number(evt.target.value),
+    });
 
-    // const input = this.element.querySelector('#event-price-1');
-    // input.setAttribute('type', 'text');
-    // const end = input.value.length;
-    // input.setSelectionRange(end, end);
-    // input.focus();
-    // input.setAttribute('type', 'number');
+    const input = this.element.querySelector('#event-price-1');
+    input.setAttribute('type', 'text');
+    const end = input.value.length;
+    input.setSelectionRange(end, end);
+    input.focus();
+    input.setAttribute('type', 'number');
   };
 
 
