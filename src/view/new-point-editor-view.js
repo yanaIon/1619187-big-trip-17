@@ -79,7 +79,7 @@ const createPointTemplate = (point, offers, listDestinations) => {
       const nameOfferForId = offerTitleArray[offerTitleArray.length-1];
 
       return `<div class="event__offer-selector">
-    <input class="event__offer-checkbox  visually-hidden" id="event-offer-${nameOfferForId}-0" type="checkbox" name="event-offer-luggage" ${checked}></input>
+    <input class="event__offer-checkbox  visually-hidden" data-id="${offer.id}" id="event-offer-${nameOfferForId}-0" type="checkbox" name="event-offer-luggage" ${checked}></input>
     <label class="event__offer-label" for="event-offer-${nameOfferForId}-0">
       <span class="event__offer-title">${offer.title}</span>
       &plus;&euro;&nbsp;
@@ -252,16 +252,9 @@ export default class NewPointEditorView extends AbstractStatefulView{
 
 
   #setPrice = (evt) => {
-    this.updateElement({
+    this._setState({
       basePrice: Number(evt.target.value),
     });
-
-    const input = this.element.querySelector('#event-price-0');
-    input.setAttribute('type', 'text');
-    const end = input.value.length;
-    input.setSelectionRange(end, end);
-    input.focus();
-    input.setAttribute('type', 'number');
   };
 
   #setInnerHandlers = () => {
@@ -271,11 +264,38 @@ export default class NewPointEditorView extends AbstractStatefulView{
       .addEventListener('change', this.#selectCityHandler);
 
     this.element.querySelector('#event-price-0').addEventListener('change', this.#setPrice);
+
+    this.element.querySelector('.event__available-offers').addEventListener('click', this.#setOffer);
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#setCancel);
+
   };
 
   reset = () => {
     this.updateElement(
       DEFAULT_STATE,
     );
+  };
+
+  #setOffer = (evt) => {
+    const id = Number(evt.target.dataset.id);
+
+    if(!isNaN(id)) {
+      const offers = this._state.offers;
+
+      if(offers.includes(id)) {
+        this.updateElement({
+          offers: offers.filter((elem) => elem !== id)
+        });
+      } else {
+        this.updateElement({
+          offers: [...offers, id]
+        });
+      }
+    }
+  };
+
+  #setCancel = () => {
+    this._callback.formClose();
+    this.reset();
   };
 }

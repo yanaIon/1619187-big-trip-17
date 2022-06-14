@@ -71,7 +71,7 @@ const createEditPointTemplate = (point, offers, listDestinations) => {
       const nameOfferForId = offerTitleArray[offerTitleArray.length-1];
 
       return `<div class="event__offer-selector">
-    <input class="event__offer-checkbox  visually-hidden" id="event-offer-${nameOfferForId}-1" type="checkbox" name="event-offer-luggage" ${checked}></input>
+    <input class="event__offer-checkbox visually-hidden" data-id="${offer.id}" id="event-offer-${nameOfferForId}-1" type="checkbox" name="event-offer-luggage" ${checked}></input>
     <label class="event__offer-label" for="event-offer-${nameOfferForId}-1">
       <span class="event__offer-title">${offer.title}</span>
       &plus;&euro;&nbsp;
@@ -225,18 +225,10 @@ export default class EditPointView extends AbstractStatefulView{
 
 
   #setPrice = (evt) => {
-    this.updateElement({
+    this._setState({
       basePrice: Number(evt.target.value),
     });
-
-    const input = this.element.querySelector('#event-price-1');
-    input.setAttribute('type', 'text');
-    const end = input.value.length;
-    input.setSelectionRange(end, end);
-    input.focus();
-    input.setAttribute('type', 'number');
   };
-
 
   #setInnerHandlers = () => {
     this.element.querySelector('.event__type-group')
@@ -245,6 +237,8 @@ export default class EditPointView extends AbstractStatefulView{
       .addEventListener('change', this.#selectCityHandler);
 
     this.element.querySelector('#event-price-1').addEventListener('input', this.#setPrice);
+
+    this.element.querySelector('.event__available-offers').addEventListener('click', this.#setOffer);
 
   };
 
@@ -271,5 +265,23 @@ export default class EditPointView extends AbstractStatefulView{
 
   #pointDeletekHandler = () => {
     this._callback.pointDeleteClick();
+  };
+
+  #setOffer = (evt) => {
+    const id = Number(evt.target.dataset.id);
+
+    if(!isNaN(id)) {
+      const offers = this._state.offers;
+
+      if(offers.includes(id)) {
+        this.updateElement({
+          offers: offers.filter((elem) => elem !== id)
+        });
+      } else {
+        this.updateElement({
+          offers: [...offers, id]
+        });
+      }
+    }
   };
 }

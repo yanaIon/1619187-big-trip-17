@@ -90,7 +90,7 @@ export default class ListPointPresenter {
   };
 
   #renderListPoint = () => {
-    const points = [...this.points];
+    const points = this.points;
 
     for (let i = 0; i < points.length; i++) {
       this.#renderPoint(points[i]);
