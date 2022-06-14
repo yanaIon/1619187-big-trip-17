@@ -7,7 +7,6 @@ import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 
 const DEFAULT_STATE = {
-  id: null,
   basePrice: null,
   dateFrom: new Date(),
   dateTo: new Date(),

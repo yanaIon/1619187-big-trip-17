@@ -7,15 +7,20 @@ import duration from 'dayjs/plugin/duration';
 import dayjs from 'dayjs';
 
 import NewPointButtonView from './view/new-point-button-view.js';
+import PointsApiService from './points-api-service.js';
 
 dayjs.extend(duration);
 
+const AUTHORIZATION = 'Basic KQtTfd9xxbL8HPjD';
+const END_POINT = 'https://17.ecmascript.pages.academy/big-trip';
 
 const tripMain = document.querySelector('.trip-main');
 const tripFilters = tripMain.querySelector('.trip-controls__filters');
 const tripEvents = document.querySelector('.trip-events');
 
-const pointsModel = new PointsModel();
+const pointsModel = new PointsModel(new PointsApiService(END_POINT, AUTHORIZATION));
+
+
 const filterModel = new FilterModel();
 
 const newPointButtonComponent = new NewPointButtonView();
@@ -38,6 +43,10 @@ const handleNewPointButtonClick = () => {
   listPointPresenter.createPoint(handleNewPointFormClose);
   newPointButtonComponent.element.disabled = true;
 };
-newPointButtonComponent.setClickHandler(handleNewPointButtonClick);
 
-render(newPointButtonComponent, tripMain);
+
+pointsModel.init().finally(() => {
+  newPointButtonComponent.setClickHandler(handleNewPointButtonClick);
+
+  render(newPointButtonComponent, tripMain);
+});
