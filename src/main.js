@@ -7,6 +7,7 @@ import duration from 'dayjs/plugin/duration';
 import dayjs from 'dayjs';
 
 import NewPointButtonView from './view/new-point-button-view.js';
+import NoPointView from './view/no-point-view.js';
 import PointsApiService from './points-api-service.js';
 
 dayjs.extend(duration);
@@ -45,8 +46,13 @@ const handleNewPointButtonClick = () => {
 };
 
 
-pointsModel.init().finally(() => {
+pointsModel.init().then(() => {
   newPointButtonComponent.setClickHandler(handleNewPointButtonClick);
 
   render(newPointButtonComponent, tripMain);
+}).catch(() => {
+  listPointPresenter.destroy();
+  const noPointComponent = new NoPointView('Some error happened. Try later');
+  render(noPointComponent, tripEvents);
+
 });

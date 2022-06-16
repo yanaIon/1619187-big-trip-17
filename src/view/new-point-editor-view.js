@@ -44,19 +44,19 @@ const createFieldGroup = (type, currentDestination, destinationCity) => `<div cl
 <label class="event__label  event__type-output" for="event-destination-1">
 ${type}
 </label>
-<select value="${currentDestination.name}"  class="event__input  event__input--destination" id="destination-list-1">
+<select value="${currentDestination?.name}"  class="event__input  event__input--destination" id="destination-list-1">
 ${destinationCity.map((city)=>
-    `<option value="${city}" ${city === currentDestination.name ? 'selected':''}>${city}</option>`
+    `<option value="${city}" ${city === currentDestination?.name ? 'selected':''}>${city}</option>`
   ).join('')}
 </select>
 </div>`;
 
 const createDestination = (currentDestination) =>
-  `<p class="event__destination-description">${currentDestination.description}</p>
+  `<p class="event__destination-description">${currentDestination?.description}</p>
   <div class="event__photos-container">
   <div class="event__photos-tape">
-  ${currentDestination.pictures.map((picture) =>
-    `<img class="event__photo" src="${picture.src}" alt="${picture.description}">`
+  ${currentDestination?.pictures.map((picture) =>
+    `<img class="event__photo" src="${picture?.src}" alt="${picture?.description}">`
   ).join('')}
   </div>
 </div>`;
@@ -71,7 +71,7 @@ const createPointTemplate = (point, offers, listDestinations) => {
   const getOffersList = function (offersList, currentPoint) {
 
     const currentOffers = offersList.find((offersGroup) => offersGroup.type === currentPoint.type);
-    return currentOffers.offers.map((offer) => {
+    return currentOffers?.offers.map((offer) => {
 
       const checked = currentPoint.offers.includes(offer.id) ? 'checked' : '';
       const offerTitleArray = offer.title.split(' ');
@@ -200,17 +200,17 @@ export default class NewPointEditorView extends AbstractStatefulView{
     this.setFormSubmitHandler(this._callback.formSubmit);
   };
 
-  #selectTypeHandler = (evt) => {
-    evt.preventDefault();
+  #selectTypeHandler = (event) => {
+    event.preventDefault();
     this.updateElement({
-      type: evt.target.dataset.eventType,
+      type: event.target.dataset.eventType,
     });
   };
 
-  #selectCityHandler = (evt) => {
-    evt.preventDefault();
+  #selectCityHandler = (event) => {
+    event.preventDefault();
     this.updateElement({
-      destination: evt.target.value,
+      destination: event.target.value,
     });
   };
 
@@ -225,8 +225,8 @@ export default class NewPointEditorView extends AbstractStatefulView{
     document.querySelector('.trip-main__event-add-btn').addEventListener('click', this.#formOpenHandler);
   };
 
-  #formOpenHandler = (evt) => {
-    evt.preventDefault();
+  #formOpenHandler = (event) => {
+    event.preventDefault();
     if (typeof this._callback.formOpen === 'function') {
       this._callback.formOpen();
     }
@@ -238,21 +238,21 @@ export default class NewPointEditorView extends AbstractStatefulView{
     document.addEventListener('keydown', this.#formCloseHandler);
   };
 
-  #formCloseHandler = (evt) => {
-    if (typeof this._callback.formClose === 'function' && (evt.key === 'Escape' || evt.key === 'Esc')) {
+  #formCloseHandler = (event) => {
+    if (typeof this._callback.formClose === 'function' && (event.key === 'Escape' || event.key === 'Esc')) {
       this._callback.formClose();
     }
   };
 
-  #formSubmitHandler = (evt) => {
-    evt.preventDefault();
+  #formSubmitHandler = (event) => {
+    event.preventDefault();
     this._callback.formSubmit();
   };
 
 
-  #setPrice = (evt) => {
+  #setPrice = (event) => {
     this._setState({
-      basePrice: Number(evt.target.value),
+      basePrice: Number(event.target.value),
     });
   };
 
@@ -275,8 +275,8 @@ export default class NewPointEditorView extends AbstractStatefulView{
     );
   };
 
-  #setOffer = (evt) => {
-    const id = Number(evt.target.dataset.id);
+  #setOffer = (event) => {
+    const id = Number(event.target.dataset.id);
 
     if(!isNaN(id)) {
       const offers = this._state.offers;

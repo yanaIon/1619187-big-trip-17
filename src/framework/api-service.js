@@ -36,8 +36,8 @@ export default class ApiService {
     try {
       ApiService.checkStatus(response);
       return response;
-    } catch (err) {
-      ApiService.catchError(err);
+    } catch (error) {
+      ApiService.catchError(error);
     }
   };
 
@@ -62,7 +62,7 @@ export default class ApiService {
    * Метод для обработки ошибок
    * @param {Error} err Объект ошибки
    */
-  static catchError = (err) => {
-    throw err;
+  static catchError = (error) => {
+    throw error;
   };
 }

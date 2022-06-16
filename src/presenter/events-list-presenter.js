@@ -221,6 +221,10 @@ export default class ListPointPresenter {
     render(this.#newPointEditorView, this.#listComponent.element, RenderPosition.BEFOREBEGIN);
 
     /** Форма добавления */
-
   };
+
+  destroy(){
+    remove(this.#loadingComponent);
+    this.#clearBoard();
+  }
 }
