@@ -1,7 +1,6 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import {TYPE} from '../const.js';
 import {CITY} from '../const.js';
-//import {humanizeDateWithTime} from '../util.js';
 import flatpickr from 'flatpickr';
 
 import 'flatpickr/dist/flatpickr.min.css';
@@ -17,13 +16,13 @@ const DEFAULT_STATE = {
 };
 
 
-const createTypeDropdown = (currentType) => `
+const createTypeDropdown = (currentType, isDisabled) => `
 <div class="event__type-wrapper">
 <label class="event__type  event__type-btn" for="event-type-toggle-0">
   <span class="visually-hidden">Choose event type</span>
   <img class="event__type-icon" width="17" height="17" src="img/icons/${currentType}.png" alt="Event type icon">
 </label>
-<input class="event__type-toggle  visually-hidden" id="event-type-toggle-0" type="checkbox">
+<input class="event__type-toggle  visually-hidden" id="event-type-toggle-0" type="checkbox" ${isDisabled ? 'disabled' : ''}>
 
 <div class="event__type-list">
   <fieldset class="event__type-group">
@@ -31,7 +30,7 @@ const createTypeDropdown = (currentType) => `
 
     ${TYPE.map((type) => `
     <div class="event__type-item">
-    <input ${type === currentType ? 'checked' : ''} id="event-type-${type}-0" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}">
+    <input ${type === currentType ? 'checked' : ''} ${isDisabled ? 'disabled' : ''} id="event-type-${type}-0" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}">
     <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-0" data-event-type="${type}">${type}</label>
   </div>
   `).join('')}
@@ -40,11 +39,11 @@ const createTypeDropdown = (currentType) => `
 </div>
 `;
 
-const createFieldGroup = (type, currentDestination, destinationCity) => `<div class="event__field-group  event__field-group--destination">
+const createFieldGroup = (type, currentDestination, destinationCity, isDisabled) => `<div class="event__field-group  event__field-group--destination">
 <label class="event__label  event__type-output" for="event-destination-1">
 ${type}
 </label>
-<select value="${currentDestination?.name}"  class="event__input  event__input--destination" id="destination-list-1">
+<select value="${currentDestination?.name}" ${isDisabled ? 'disabled' : ''}  class="event__input  event__input--destination" id="destination-list-1">
 ${destinationCity.map((city)=>
     `<option value="${city}" ${city === currentDestination?.name ? 'selected':''}>${city}</option>`
   ).join('')}
@@ -62,7 +61,7 @@ const createDestination = (currentDestination) =>
 </div>`;
 
 const createPointTemplate = (point, offers, listDestinations) => {
-  const {basePrice, dateFrom, dateTo, type} = point;
+  const {basePrice, dateFrom, dateTo, type, isDisabled, isSaving} = point;
   const destination = listDestinations.find((destinationItem) => destinationItem.name === point.destination);
   const dateStart = dateFrom;
   const dateEnd = dateTo;
@@ -78,7 +77,7 @@ const createPointTemplate = (point, offers, listDestinations) => {
       const nameOfferForId = offerTitleArray[offerTitleArray.length-1];
 
       return `<div class="event__offer-selector">
-    <input class="event__offer-checkbox  visually-hidden" data-id="${offer.id}" id="event-offer-${nameOfferForId}-0" type="checkbox" name="event-offer-luggage" ${checked}></input>
+    <input class="event__offer-checkbox  visually-hidden" ${isDisabled ? 'disabled' : ''} data-id="${offer.id}" id="event-offer-${nameOfferForId}-0" type="checkbox" name="event-offer-luggage" ${checked}></input>
     <label class="event__offer-label" for="event-offer-${nameOfferForId}-0">
       <span class="event__offer-title">${offer.title}</span>
       &plus;&euro;&nbsp;
@@ -91,8 +90,8 @@ const createPointTemplate = (point, offers, listDestinations) => {
     `<li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
       <header class="event__header">
-        ${createTypeDropdown(type)}
-        ${createFieldGroup(type, destination, CITY)}
+        ${createTypeDropdown(type, isDisabled)}
+        ${createFieldGroup(type, destination, CITY, isDisabled)}
         <div class="event__field-group  event__field-group--time">
           <label class="visually-hidden" for="event-start-time-0">From</label>
           <input class="event__input  event__input--time" id="event-start-time-0" type="text" name="event-start-time" value="${dateStart}">
@@ -109,7 +108,7 @@ const createPointTemplate = (point, offers, listDestinations) => {
           <input class="event__input  event__input--price" id="event-price-0" type="number" name="event-price" value="${basePrice}">
         </div>
 
-        <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
+        <button class="event__save-btn  btn  btn--blue" type="submit">${isSaving ? 'saving...' : 'save'}</button>
         <button class="event__reset-btn" type="reset">Cancel</button>
       </header>
       <section class="event__details">
@@ -136,7 +135,8 @@ export default class NewPointEditorView extends AbstractStatefulView{
 
   constructor(offers, listDestinations) {
     super();
-    this._state = { ...DEFAULT_STATE };
+    this._state = NewPointEditorView.parsePointToState({...DEFAULT_STATE});
+
     this.offers = offers;
     this.listDestinations = listDestinations;
 
@@ -215,7 +215,7 @@ export default class NewPointEditorView extends AbstractStatefulView{
   };
 
   setFormSubmitHandler = (callback) => {
-    this._callback.formSubmit = () => callback(this._state);
+    this._callback.formSubmit = () => callback(NewPointEditorView.parseStateToPoint(this._state));
     this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
   };
 
@@ -296,5 +296,21 @@ export default class NewPointEditorView extends AbstractStatefulView{
   #setCancel = () => {
     this._callback.formClose();
     this.reset();
+  };
+
+  static parsePointToState = (point) => ({
+    ...point,
+    isDisabled: false,
+    isSaving: false,
+    isDeleting: false,
+  });
+
+  static parseStateToPoint = (state) => {
+    const newState = {...state};
+    delete newState.isDisabled;
+    delete newState.isSaving;
+    delete newState.isDeleting;
+
+    return newState;
   };
 }
