@@ -51,12 +51,12 @@ export default class FilterView extends AbstractView {
     this.element.addEventListener('click', this.#clickHandler);
   };
 
-  #clickHandler = (evt) => {
-    evt.preventDefault();
+  #clickHandler = (event) => {
+    event.preventDefault();
 
-    if(evt.target.attributes.disabled || !evt.target.htmlFor) { return; }
+    if(event.target.attributes.disabled || !event.target.htmlFor) { return; }
 
-    const filter = evt.target.htmlFor.split('__')[1];
+    const filter = event.target.htmlFor.split('__')[1];
     this._callback.click(filter);
   };
 }

@@ -8,12 +8,15 @@ import PointPresenter from './point-presenter.js';
 import {sortPointsByDuration, sortPointsByPrice, filter} from '../util.js';
 import {SortType} from '../const.js';
 import {UserAction, UpdateType} from '../const.js';
+import LoadingView from '../view/loading-view.js';
 
 export default class ListPointPresenter {
   #listContainer = null;
   #pointsModel = null;
   #filterModel = null;
+  #isLoading = true;
 
+  #loadingComponent = new LoadingView();
   #listComponent = new ListPointView();
   #noPointComponent = null;
   #currentSortType = SortType.DAY;
@@ -75,6 +78,14 @@ export default class ListPointPresenter {
         this.#clearBoard({resetSortType: true});
         this.#renderBoard();
         break;
+      case UpdateType.INIT:
+        this.#isLoading = false;
+        this.#listOffers = this.#pointsModel.offer;
+        this.#listDestinations = this.#pointsModel.destinatinations;
+
+        remove(this.#loadingComponent);
+        this.#renderBoard();
+        break;
     }
   };
 
@@ -90,7 +101,7 @@ export default class ListPointPresenter {
   };
 
   #renderListPoint = () => {
-    const points = [...this.points];
+    const points = this.points;
 
     for (let i = 0; i < points.length; i++) {
       this.#renderPoint(points[i]);
@@ -102,6 +113,10 @@ export default class ListPointPresenter {
 
     pointPresenter.init(point, this.#listOffers, this.#listDestinations);
     this.#pointPresenters.set(point.id, pointPresenter);
+  };
+
+  #renderLoading = () => {
+    render(this.#loadingComponent, this.#listComponent.element, RenderPosition.AFTERBEGIN);
   };
 
   #handleSortTypeChange = (sortType) => {
@@ -155,6 +170,12 @@ export default class ListPointPresenter {
   #renderBoard = () => {
     render(this.#listComponent, this.#listContainer);
 
+
+    if (this.#isLoading) {
+      this.#renderLoading();
+      return;
+    }
+
     const points = this.points;
     const currentFilter = this.#filterModel.filter;
     const text = this.#filterModel.noPointTextByFilter[currentFilter];
@@ -200,6 +221,10 @@ export default class ListPointPresenter {
     render(this.#newPointEditorView, this.#listComponent.element, RenderPosition.BEFOREBEGIN);
 
     /** Форма добавления */
-
   };
+
+  destroy(){
+    remove(this.#loadingComponent);
+    this.#clearBoard();
+  }
 }
