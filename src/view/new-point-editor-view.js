@@ -43,19 +43,19 @@ const createFieldGroup = (type, currentDestination, destinationCity, isDisabled)
 <label class="event__label  event__type-output" for="event-destination-1">
 ${type}
 </label>
-<select value="${currentDestination?.name}" ${isDisabled ? 'disabled' : ''}  class="event__input  event__input--destination" id="destination-list-1">
+<select value="${currentDestination.name}" ${isDisabled ? 'disabled' : ''}  class="event__input  event__input--destination" id="destination-list-1">
 ${destinationCity.map((city)=>
-    `<option value="${city}" ${city === currentDestination?.name ? 'selected':''}>${city}</option>`
+    `<option value="${city}" ${city === currentDestination.name ? 'selected':''}>${city}</option>`
   ).join('')}
 </select>
 </div>`;
 
 const createDestination = (currentDestination) =>
-  `<p class="event__destination-description">${currentDestination?.description}</p>
+  `<p class="event__destination-description">${currentDestination.description}</p>
   <div class="event__photos-container">
   <div class="event__photos-tape">
-  ${currentDestination?.pictures.map((picture) =>
-    `<img class="event__photo" src="${picture?.src}" alt="${picture?.description}">`
+  ${currentDestination.pictures.map((picture) =>
+    `<img class="event__photo" src="${picture.src}" alt="${picture.description}">`
   ).join('')}
   </div>
 </div>`;
@@ -70,7 +70,7 @@ const createPointTemplate = (point, offers, listDestinations) => {
   const getOffersList = function (offersList, currentPoint) {
 
     const currentOffers = offersList.find((offersGroup) => offersGroup.type === currentPoint.type);
-    return currentOffers?.offers.map((offer) => {
+    return currentOffers.offers.map((offer) => {
 
       const checked = currentPoint.offers.includes(offer.id) ? 'checked' : '';
       const offerTitleArray = offer.title.split(' ');

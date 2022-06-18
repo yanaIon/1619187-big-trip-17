@@ -76,10 +76,19 @@ export default class ListPointPresenter {
         try {
           await  this.#pointsModel.addPoint(updateType, update);
         } catch (error) {
-          this.#newPointEditorView.updateElement({
-            isDisabled: false,
-            isSaving: false,
-          });
+          // this.#newPointEditorView.updateElement({
+          //   isDisabled: false,
+          //   isSaving: false,
+          // });
+
+          const resetFormState = () => {
+            this.#newPointEditorView.updateElement({
+              isDisabled: false,
+              isSaving: false,
+            });
+          };
+
+          this.#newPointEditorView.shake(resetFormState);
         }
         break;
       case UserAction.DELETE_TASK:
@@ -238,8 +247,8 @@ export default class ListPointPresenter {
     this.#newPointEditorView.setFormSubmitHandler((update) => {
       this.#handleViewAction(UserAction.ADD_TASK, UpdateType.MINOR, update);
 
-      remove(this.#newPointEditorView);
-      this.#newPointEditorView = null;
+      // remove(this.#newPointEditorView);
+      // this.#newPointEditorView = null;
       cb();
     });
 
