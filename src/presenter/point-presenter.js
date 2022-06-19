@@ -125,8 +125,8 @@ export default class PointPresenter {
       update,
     );
 
-    this.#replaceFormToPoint();
-    document.removeEventListener('keydown', this.#escKeyDownHandler);
+    // this.#replaceFormToPoint();
+    // document.removeEventListener('keydown', this.#escKeyDownHandler);
   };
 
 
@@ -139,4 +139,40 @@ export default class PointPresenter {
 
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   };
+
+  setSaving = () => {
+    if (this.#mode === Mode.EDITING) {
+      this.#editPointComponent.updateElement({
+        isDisabled: true,
+        isSaving: true,
+      });
+    }
+  };
+
+  setDeleting = () => {
+    if (this.#mode === Mode.EDITING) {
+      this.#editPointComponent.updateElement({
+        isDisabled: true,
+        isDeleting: true,
+      });
+    }
+  };
+
+  setAborting = () => {
+    if (this.#mode === Mode.DEFAULT) {
+      this.#editPointComponent.shake();
+      return;
+    }
+
+    const resetFormState = () => {
+      this.#editPointComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#editPointComponent.shake(resetFormState);
+  };
 }
+
