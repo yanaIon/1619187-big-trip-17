@@ -25,6 +25,7 @@ export default class ListPointPresenter {
 
   #handleModelEvent = (updateType) => {
     switch (updateType) {
+      case UpdateType.INIT:
       case UpdateType.PATCH:
       case UpdateType.MINOR:
       case UpdateType.MAJOR:

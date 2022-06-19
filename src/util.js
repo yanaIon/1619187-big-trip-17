@@ -30,6 +30,13 @@ const getPointDuration = (point) => {
   return duration;
 };
 
+const sortPointsByDay = (pointA, pointB) => {
+  const diff = dayjs.duration(dayjs(pointA.dateFrom).diff(dayjs(pointB.dateFrom)));
+
+  return diff.asSeconds();
+};
+
+
 const sortPointsByDuration = (pointA, pointB) => {
   const durationA = getPointDuration(pointA).asSeconds();
   const durationB = getPointDuration(pointB).asSeconds();
@@ -63,4 +70,4 @@ const getRandomInteger = (a = 0, b = 1) => {
 };
 
 
-export {humanizeTime, humanizeDateWithTime, humanizeDateMonthAndDay, humanizeDateWIithoutTime, getRandomInteger, generateFilter, sortPointsByDuration, sortPointsByPrice, filter};
+export {humanizeTime, humanizeDateWithTime, humanizeDateMonthAndDay, humanizeDateWIithoutTime, getRandomInteger, generateFilter, sortPointsByDuration, sortPointsByPrice, filter, sortPointsByDay, getPointDuration};
