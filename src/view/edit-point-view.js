@@ -29,8 +29,6 @@ const createTypeDropdown = (currentType, isDisabled) => `
 </div>
 `;
 
-{/* <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${currentDestination.name}" list="destination-list-1"> */}
-
 const createFieldGroup = (type, currentDestination, destinationCity, isDisabled) => `<div class="event__field-group  event__field-group--destination">
    <label class="event__label  event__type-output" for="event-destination-1">
      ${type}
