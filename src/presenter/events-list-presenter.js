@@ -76,11 +76,6 @@ export default class ListPointPresenter {
         try {
           await  this.#pointsModel.addPoint(updateType, update);
         } catch (error) {
-          // this.#newPointEditorView.updateElement({
-          //   isDisabled: false,
-          //   isSaving: false,
-          // });
-
           const resetFormState = () => {
             this.#newPointEditorView.updateElement({
               isDisabled: false,
@@ -108,7 +103,6 @@ export default class ListPointPresenter {
   #handleModelEvent = (updateType, data) => {
     switch (updateType) {
       case UpdateType.PATCH:
-        // - обновить часть списка (например, когда поменялось описание)
         this.#pointPresenters.get(data.id).init(data, this.#listOffers, this.#listDestinations);
         break;
       case UpdateType.MINOR:
@@ -238,7 +232,6 @@ export default class ListPointPresenter {
   };
 
   createPoint = (cb) => {
-    /** Форма добавления */
     this.#pointPresenters.forEach((presenter) => presenter.resetView());
 
     this.#newPointEditorView = new NewPointEditorView(this.#listOffers, this.#listDestinations);
@@ -246,9 +239,6 @@ export default class ListPointPresenter {
 
     this.#newPointEditorView.setFormSubmitHandler((update) => {
       this.#handleViewAction(UserAction.ADD_TASK, UpdateType.MINOR, update);
-
-      // remove(this.#newPointEditorView);
-      // this.#newPointEditorView = null;
       cb();
     });
 
@@ -260,8 +250,6 @@ export default class ListPointPresenter {
     });
 
     render(this.#newPointEditorView, this.#listComponent.element, RenderPosition.BEFOREBEGIN);
-
-    /** Форма добавления */
   };
 
   destroy(){
