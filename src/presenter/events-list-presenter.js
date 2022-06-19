@@ -6,7 +6,7 @@ import NoPointView from '../view/no-point-view.js';
 import InfoView from '../view/trip-info-view.js';
 import SortView from '../view/sort-view.js';
 import PointPresenter from './point-presenter.js';
-import {sortPointsByDuration, sortPointsByPrice, filter} from '../util.js';
+import {sortPointsByDuration, sortPointsByPrice, filter, sortPointsByDay} from '../util.js';
 import {SortType} from '../const.js';
 import {UserAction, UpdateType} from '../const.js';
 import LoadingView from '../view/loading-view.js';
@@ -20,6 +20,10 @@ export default class ListPointPresenter {
   #pointsModel = null;
   #filterModel = null;
   #isLoading = true;
+  #closeNewPointForm = () => {
+    document.querySelector('.trip-main__event-add-btn').disabled=false;
+    remove(this.#newPointEditorView);
+  };
 
   #loadingComponent = new LoadingView();
   #listComponent = new ListPointView();
@@ -52,7 +56,8 @@ export default class ListPointPresenter {
       case SortType.TIME:
         return [...points].sort(sortPointsByDuration);
     }
-    return points;
+
+    return [...points].sort(sortPointsByDay);
   }
 
 
@@ -144,8 +149,7 @@ export default class ListPointPresenter {
   };
 
   #renderPoint = (point) => {
-    const pointPresenter = new PointPresenter(this.#listComponent.element, this.#handleViewAction ,this.#handleModeChange);
-
+    const pointPresenter = new PointPresenter(this.#listComponent.element, this.#handleViewAction ,this.#handleModeChange, this.#closeNewPointForm);
     pointPresenter.init(point, this.#listOffers, this.#listDestinations);
     this.#pointPresenters.set(point.id, pointPresenter);
   };
@@ -232,6 +236,14 @@ export default class ListPointPresenter {
   };
 
   createPoint = (cb) => {
+
+    const closeNewPointForm = () => {
+
+      remove(this.#newPointEditorView);
+      this.#newPointEditorView = null;
+      cb();
+    };
+
     this.#pointPresenters.forEach((presenter) => presenter.resetView());
 
     this.#newPointEditorView = new NewPointEditorView(this.#listOffers, this.#listDestinations);
@@ -242,14 +254,9 @@ export default class ListPointPresenter {
       cb();
     });
 
-    this.#newPointEditorView.setFormCloseHandler(() => {
+    this.#newPointEditorView.setFormCloseHandler(closeNewPointForm);
 
-      remove(this.#newPointEditorView);
-      this.#newPointEditorView = null;
-      cb();
-    });
-
-    render(this.#newPointEditorView, this.#listComponent.element, RenderPosition.BEFOREBEGIN);
+    render(this.#newPointEditorView, this.#listComponent.element, RenderPosition.AFTERBEGIN);
   };
 
   destroy(){

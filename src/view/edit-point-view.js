@@ -1,7 +1,6 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import {TYPE} from '../const.js';
-import {CITY} from '../const.js';
-import {humanizeDateWithTime} from '../util.js';
+import {humanizeDateWithTime, getPointDuration} from '../util.js';
 import flatpickr from 'flatpickr';
 
 import 'flatpickr/dist/flatpickr.min.css';
@@ -35,7 +34,7 @@ const createFieldGroup = (type, currentDestination, destinationCity, isDisabled)
    </label>
    <select value="${currentDestination.name}" ${isDisabled ? 'disabled' : ''}  class="event__input  event__input--destination" id="destination-list-1">
    ${destinationCity.map((city)=>
-    `<option value="${city}" ${city === currentDestination.name ? 'selected':''}>${city}</option>`
+    `<option value="${city.name}" ${city.name === currentDestination.name ? 'selected':''}>${city.name}</option>`
   ).join('')}
    </select>
  </div>`;
@@ -82,7 +81,7 @@ const createEditPointTemplate = (point, offers, listDestinations) => {
     <form class="event event--edit" action="#" method="post">
       <header class="event__header">
         ${createTypeDropdown(type, isDisabled)}
-        ${createFieldGroup(type, destination, CITY, isDisabled)}
+        ${createFieldGroup(type, destination, listDestinations, isDisabled)}
         <div class="event__field-group  event__field-group--time">
           <label class="visually-hidden" for="event-start-time-1">From</label>
           <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dateStart}">
@@ -153,15 +152,27 @@ export default class EditPointView extends AbstractStatefulView{
   };
 
   #dateFromChangeHandler = ([userDate]) => {
-    this.updateElement({
-      dateFrom: userDate,
-    });
+    if (getPointDuration({...this._state, dateTo: userDate, }).asSeconds() < 0) {
+      this.updateElement({
+        dateFrom: this._state.dateTo,
+      });
+    } else {
+      this.updateElement({
+        dateFrom: userDate,
+      });
+    }
   };
 
   #dateToChangeHandler = ([userDate]) => {
-    this.updateElement({
-      dateTo: userDate,
-    });
+    if (getPointDuration({...this._state, dateTo: userDate, }).asSeconds() < 0) {
+      this.updateElement({
+        dateTo: this._state.dateFrom,
+      });
+    } else {
+      this.updateElement({
+        dateTo: userDate,
+      });
+    }
   };
 
   #setDatepickerFrom = () => {
@@ -224,9 +235,15 @@ export default class EditPointView extends AbstractStatefulView{
 
 
   #setPrice = (event) => {
-    this._setState({
-      basePrice: Number(event.target.value),
-    });
+    if( Number(event.target.value) >0) {
+      this._setState({
+        basePrice: Number(event.target.value),
+      });
+    } else {
+      this.updateElement({
+        basePrice: 1,
+      });
+    }
   };
 
   #setInnerHandlers = () => {
