@@ -3,12 +3,11 @@ import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 import NewPointEditorView from '../view/new-point-editor-view.js';
 import ListPointView from '../view/list-point-view.js';
 import NoPointView from '../view/no-point-view.js';
-import InfoView from '../view/trip-info-view.js';
+import TripInfoView from '../view/trip-info-view.js';
 import SortView from '../view/sort-view.js';
 import PointPresenter from './point-presenter.js';
 import {sortPointsByDuration, sortPointsByPrice, filter, sortPointsByDay} from '../util.js';
-import {SortType} from '../const.js';
-import {UserAction, UpdateType} from '../const.js';
+import {UserAction, UpdateType, SortType} from '../const.js';
 import LoadingView from '../view/loading-view.js';
 
 const TimeLimit = {
@@ -143,8 +142,8 @@ export default class ListPointPresenter {
   #renderListPoint = () => {
     const points = this.points;
 
-    for (let i = 0; i < points.length; i++) {
-      this.#renderPoint(points[i]);
+    for (const point of points) {
+      this.#renderPoint(point);
     }
   };
 
@@ -225,7 +224,7 @@ export default class ListPointPresenter {
     }
 
     const tripMain = document.querySelector('.trip-main');
-    this.#infoView = new InfoView();
+    this.#infoView = new TripInfoView();
 
     render(this.#infoView, tripMain, 'afterbegin');
     this.#renderSort();

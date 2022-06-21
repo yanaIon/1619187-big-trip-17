@@ -1,5 +1,5 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
-import {TYPE} from '../const.js';
+import {TYPES} from '../const.js';
 import {humanizeDateWithTime, getPointDuration} from '../util.js';
 import flatpickr from 'flatpickr';
 
@@ -17,7 +17,7 @@ const createTypeDropdown = (currentType, isDisabled) => `
   <fieldset class="event__type-group">
     <legend class="visually-hidden">Event type</legend>
 
-    ${TYPE.map((type) => `
+    ${TYPES.map((type) => `
     <div class="event__type-item">
     <input ${type === currentType ? 'checked' : ''} ${isDisabled ? 'disabled' : ''} id="event-type-${type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}">
     <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-1" data-event-type="${type}">${type}</label>
@@ -64,8 +64,8 @@ const createEditPointTemplate = (point, offers, listDestinations) => {
     return currentOffers.offers.map((offer) => {
 
       const checked = currentPoint.offers.includes(offer.id) ? 'checked' : '';
-      const offerTitleArray = offer.title.split(' ');
-      const nameOfferForId = offerTitleArray[offerTitleArray.length-1];
+      const offersTitleList = offer.title.split(' ');
+      const nameOfferForId = offersTitleList[offersTitleList.length-1];
 
       return `<div class="event__offer-selector">
     <input class="event__offer-checkbox visually-hidden" data-id="${offer.id}" ${isDisabled ? 'disabled' : ''} id="event-offer-${nameOfferForId}-1" type="checkbox" name="event-offer-luggage" ${checked}></input>
@@ -234,7 +234,7 @@ export default class EditPointView extends AbstractStatefulView{
   };
 
 
-  #setPrice = (event) => {
+  #setPriceHandler = (event) => {
     if( Number(event.target.value) >0) {
       this._setState({
         basePrice: Number(event.target.value),
@@ -252,9 +252,9 @@ export default class EditPointView extends AbstractStatefulView{
     this.element.querySelector('.event__input--destination')
       .addEventListener('change', this.#selectCityHandler);
 
-    this.element.querySelector('#event-price-1').addEventListener('input', this.#setPrice);
+    this.element.querySelector('#event-price-1').addEventListener('input', this.#setPriceHandler);
 
-    this.element.querySelector('.event__available-offers').addEventListener('click', this.#setOffer);
+    this.element.querySelector('.event__available-offers').addEventListener('click', this.#setOfferHandler);
 
   };
 
@@ -283,7 +283,7 @@ export default class EditPointView extends AbstractStatefulView{
     this._callback.pointDeleteClick();
   };
 
-  #setOffer = (event) => {
+  #setOfferHandler = (event) => {
     const id = Number(event.target.dataset.id);
 
     if(!isNaN(id)) {

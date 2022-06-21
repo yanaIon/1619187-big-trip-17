@@ -1,5 +1,5 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
-import {TYPE} from '../const.js';
+import {TYPES} from '../const.js';
 import flatpickr from 'flatpickr';
 import {getPointDuration} from '../util.js';
 
@@ -28,7 +28,7 @@ const createTypeDropdown = (currentType, isDisabled) => `
   <fieldset class="event__type-group">
     <legend class="visually-hidden">Event type</legend>
 
-    ${TYPE.map((type) => `
+    ${TYPES.map((type) => `
     <div class="event__type-item">
     <input ${type === currentType ? 'checked' : ''} ${isDisabled ? 'disabled' : ''} id="event-type-${type}-0" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}">
     <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-0" data-event-type="${type}">${type}</label>
@@ -73,8 +73,8 @@ const createPointTemplate = (point, offers, listDestinations) => {
     return currentOffers.offers.map((offer) => {
 
       const checked = currentPoint.offers.includes(offer.id) ? 'checked' : '';
-      const offerTitleArray = offer.title.split(' ');
-      const nameOfferForId = offerTitleArray[offerTitleArray.length-1];
+      const offersTitleList = offer.title.split(' ');
+      const nameOfferForId = offersTitleList[offersTitleList.length-1];
 
       return `<div class="event__offer-selector">
     <input class="event__offer-checkbox  visually-hidden" ${isDisabled ? 'disabled' : ''} data-id="${offer.id}" id="event-offer-${nameOfferForId}-0" type="checkbox" name="event-offer-luggage" ${checked}></input>
@@ -263,7 +263,7 @@ export default class NewPointEditorView extends AbstractStatefulView{
   };
 
 
-  #setPrice = (event) => {
+  #setPriceHandler = (event) => {
     if( Number(event.target.value) >0) {
       this._setState({
         basePrice: Number(event.target.value),
@@ -281,10 +281,10 @@ export default class NewPointEditorView extends AbstractStatefulView{
     this.element.querySelector('.event__input--destination')
       .addEventListener('change', this.#selectCityHandler);
 
-    this.element.querySelector('#event-price-0').addEventListener('change', this.#setPrice);
+    this.element.querySelector('#event-price-0').addEventListener('change', this.#setPriceHandler);
 
-    this.element.querySelector('.event__available-offers').addEventListener('click', this.#setOffer);
-    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#setCancel);
+    this.element.querySelector('.event__available-offers').addEventListener('click', this.#setOfferHandler);
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#setCancelHandler);
 
   };
 
@@ -294,7 +294,7 @@ export default class NewPointEditorView extends AbstractStatefulView{
     );
   };
 
-  #setOffer = (event) => {
+  #setOfferHandler = (event) => {
     const id = Number(event.target.dataset.id);
 
     if(!isNaN(id)) {
@@ -312,7 +312,7 @@ export default class NewPointEditorView extends AbstractStatefulView{
     }
   };
 
-  #setCancel = () => {
+  #setCancelHandler = () => {
     this._callback.formClose();
     this.reset();
   };

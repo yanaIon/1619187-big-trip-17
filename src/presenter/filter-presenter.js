@@ -3,7 +3,7 @@ import FilterView from '../view/filter-view.js';
 import {UserAction, UpdateType, FilterType} from '../const.js';
 import {generateFilter} from '../util.js';
 
-export default class ListPointPresenter {
+export default class FilterPresenter {
   #filterContainer = null;
   #filterModel = null;
   #pointsModel = null;

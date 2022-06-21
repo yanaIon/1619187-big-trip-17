@@ -58,10 +58,10 @@ export default class PointsModel extends Observable {
       this.#points = this.#points.map((point) => {
         if (update.id === point.id) {
           return updatedPoint;
-        } else {
-          return point;
         }
+        return point;
       });
+
       this._notify(updateType, updatedPoint);
     } catch(error) {
       throw new Error('Can\'t update task');
